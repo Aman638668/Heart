@@ -1,491 +1,114 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <title>Monkey D. Luffy | CBR</title>
-    <link rel="stylesheet" href="/css/style.css"/>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-    <link rel="icon" type="image/x-icon" href="/img/fevicon.png">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css" integrity="sha512-dPXYcDub/aeb08c63jRq/k6GaKccl256JQy/AnOq7CAnEZ9FzSL9wSbcZkMp4R26vBsMLFYH4kQ67/bbV8XaCQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-  </head>
-  <body>
-<!--Header-->
-<header class="header">
-    <div class="row">
-        <div class="col-lg-4"><span class="header-list-icon"><a class="btn" data-bs-toggle="offcanvas" href="#offcanvasExample" role="button" aria-controls="offcanvasExample"><i class="fa-sharp fa-solid fa-bars"></i></a></span></div>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Particle Animation</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: black;
+        }
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="particleCanvas"></canvas>
+    <script>
+        const canvas = document.getElementById('particleCanvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const particles = [];
         
-        <div class="offcanvas offcanvas-start off-box" tabindex="-1" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
-            <div class="offcanvas-header">
-              <span id="search-icon"><i class="fa-solid fa-magnifying-glass"></i></span>
-              <button type="button" class="btn-close cross" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-            </div>
+        const spreadFactor = 0.5; // Adjust this value to change the spread of particles (0.1 - less spread, 1 - more spread)
+        const minSpeed = 1; // Minimum speed of particles
+        const maxSpeed = 5; // Maximum speed of particles
 
+        // Array of heart emojis and corresponding colors
+        const heartEmojis = ['❤️', '💗', '🤍', '💖', '❤️'];
+        const heartColors = ['red', 'growing', 'white', 'sparcle', 'red'];
 
-            <div class="offcanvas-body">
-              
-              <div class="dropdown row">
-                <span class="menu-title col-lg-10">FRANCHISES</span>
-                <button class="btn plus col-lg-2" type="button" data-bs-toggle="collapse" data-bs-target="#dropdown1" aria-expanded="false" aria-controls="dropdown1"><i class="fa-solid fa-plus"></i></button>
-                <div class="collapse" id="dropdown1">
-                  <ul class="list-unstyled">
-                    <li><a class="dropdown-item" href="#"><strong>Marvel</strong></a></li>
-                    <li><a class="dropdown-item" href="#"><strong>DC</strong></a></li>
-                    <li><a class="dropdown-item" href="#"><strong>Star Wars</strong></a></li>
-                    <li><a class="dropdown-item" href="#"><strong>Lord of the Rings</strong></a></li>
-                    <li><a class="dropdown-item" href="#"><strong>Naruto</strong></a></li>
-                    <li><a class="dropdown-item" href="#"><strong>One Piece</strong></a></li>
-                    <li><a class="dropdown-item" href="#"><strong>Dragon Ball</strong></a></li>
-                    <li><a class="dropdown-item" href="#"><strong>Dungeons & Dragons</strong></a></li>
-                  </ul>
-                </div>
-              </div>
+        function getRandomEmoji() {
+            return heartEmojis[Math.floor(Math.random() * heartEmojis.length)];
+        }
 
-              <BR>
-              <br>
+        function getRandomColor() {
+            return heartColors[Math.floor(Math.random() * heartColors.length)];
+        }
 
-              <div class="dropdown row ">
-                <span class="menu-title col-lg-10 menu-underline">COMICS</span>
-                <button class="btn plus col-lg-2" type="button" data-bs-toggle="collapse" data-bs-target="#dropdown2" aria-expanded="false" aria-controls="dropdown2"><i class="fa-solid fa-plus"></i></button>
-                <div class="collapse" id="dropdown2">
-                  <ul class="list-unstyled">
-                    <li><a class="dropdown-item" href="#"><strong>Comics News</strong></a></li>
-                    <li><a class="dropdown-item" href="#"><strong>Comics Features</strong></a></li>
-                    <li><a class="dropdown-item" href="#"><strong>Comics Lists</strong></a></li>
-                    <li><a class="dropdown-item" href="#"><strong>Comics Previews</strong></a></li>
-                    <li><a class="dropdown-item" href="#"><strong>Comics Reviews</strong></a></li>
-                    <li><a class="dropdown-item" href="#"><strong>Solicitations</strong></a></li>
-                  </ul>
-                </div>
-              </div>
+        function createParticle(x, y) {
+            const size = Math.random() * 20 + 10; // Emoji size
+            const speed = minSpeed + Math.random() * (maxSpeed - minSpeed); // Speed of the particle
+            const angle = Math.random() * Math.PI * 2; // Random angle in radians
 
-              <br>
+            // Calculate velocity components based on spread around the cursor
+            const vx = Math.cos(angle) * speed * (Math.random() * spreadFactor + 0.5);
+            const vy = Math.sin(angle) * speed * (Math.random() * spreadFactor + 0.5);
 
-              <div class="dropdown row ">
-                <span class="menu-title col-lg-10 menu-underline">ANIME</span>
-                <button class="btn plus col-lg-2" type="button" data-bs-toggle="collapse" data-bs-target="#dropdown3" aria-expanded="false" aria-controls="dropdown3"><i class="fa-solid fa-plus"></i></button>
-                <div class="collapse" id="dropdown3">
-                  <ul class="list-unstyled">
-                    <li><a class="dropdown-item" href="#"><strong>Anime News</strong></a></li>
-                    <li><a class="dropdown-item" href="#"><strong>Anime Features</strong></a></li>
-                    <li><a class="dropdown-item" href="#"><strong>Anime Lists</strong></a></li>
-                  </ul>
-                </div>
-              </div>
+            particles.push({
+                x: x,
+                y: y,
+                size: size,
+                opacity: 1,
+                vx: vx,
+                vy: vy,
+                life: 3000, // 3 seconds
+                emoji: getRandomEmoji(),
+                color: getRandomColor()
+            });
+        }
 
-              <br>
+        function fadeOutParticle(particle, index) {
+            particle.opacity -= 0.02;
+            if (particle.opacity <= 0) {
+                particles.splice(index, 1);
+            }
+        }
 
-              <div class="dropdown row ">
-                <span class="menu-title col-lg-10 menu-underline">MOVIES</span>
-                <button class="btn plus col-lg-2" type="button" data-bs-toggle="collapse" data-bs-target="#dropdown4" aria-expanded="false" aria-controls="dropdown4"><i class="fa-solid fa-plus"></i></button>
-                <div class="collapse" id="dropdown4">
-                  <ul class="list-unstyled">
-                    <li><a class="dropdown-item" href="#"><strong>Movie News</strong></a></li>
-                    <li><a class="dropdown-item" href="#"><strong>Movie Features</strong></a></li>
-                    <li><a class="dropdown-item" href="#"><strong>Movie Lists</strong></a></li>
-                    <li><a class="dropdown-item" href="#"><strong>Movie Reviews</strong></a></li>
-                    <li><a class="dropdown-item" href="#"><strong>Comics Reviews</strong></a></li>
-                    <li><a class="dropdown-item" href="#"><strong>Solicitations</strong></a></li>
-                  </ul>
-                </div>
-              </div>
+        document.addEventListener('mousemove', (event) => {
+            for (let i = 0; i < 5; i++) {
+                createParticle(event.clientX, event.clientY);
+            }
+        });
 
-              <br>
+        document.addEventListener('click', (event) => {
+            for (let i = 0; i < 20; i++) {
+                createParticle(event.clientX, event.clientY);
+            }
+        });
 
-              <div class="dropdown row ">
-                <span class="menu-title col-lg-10 menu-underline">TV</span>
-                <button class="btn plus col-lg-2" type="button" data-bs-toggle="collapse" data-bs-target="#dropdown5" aria-expanded="false" aria-controls="dropdown5"><i class="fa-solid fa-plus"></i></button>
-                <div class="collapse" id="dropdown5">
-                  <ul class="list-unstyled">
-                    <li><a class="dropdown-item" href="#"><strong>TV News</strong></a></li>
-                    <li><a class="dropdown-item" href="#"><strong>TV Features</strong></a></li>
-                    <li><a class="dropdown-item" href="#"><strong>TV Lists</strong></a></li>
-                    <li><a class="dropdown-item" href="#"><strong>TV Reviews</strong></a></li>
-                  </ul>
-                </div>
-              </div>
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-              <br>
+            particles.forEach((particle, index) => {
+                particle.x += particle.vx;
+                particle.y += particle.vy;
+                particle.life -= 16.66; // assuming 60 FPS
+                if (particle.life <= 0) {
+                    fadeOutParticle(particle, index);
+                } else {
+                    ctx.globalAlpha = particle.opacity;
+                    ctx.font = ${particle.size}px Arial; // Set font size based on particle size
+                    ctx.fillStyle = particle.color;
+                    ctx.fillText(particle.emoji, particle.x, particle.y); // Draw heart emoji with selected color
+                }
+            });
 
-              <div class="dropdown row ">
-                <span class="menu-title col-lg-10 menu-underline">GAMES</span>
-                <button class="btn plus col-lg-2" type="button" data-bs-toggle="collapse" data-bs-target="#dropdown6" aria-expanded="false" aria-controls="dropdown6"><i class="fa-solid fa-plus"></i></button>
-                <div class="collapse" id="dropdown6">
-                  <ul class="list-unstyled">
-                    <li><a class="dropdown-item" href="#"><strong>Game News</strong></a></li>
-                    <li><a class="dropdown-item" href="#"><strong>Game Features</strong></a></li>
-                    <li><a class="dropdown-item" href="#"><strong>Game Lists</strong></a></li>
-                    <li><a class="dropdown-item" href="#"><strong>Game Guides</strong></a></li>
-                  </ul>
-                </div>
-              </div>
+            ctx.globalAlpha = 1;
+            requestAnimationFrame(animateParticles);
+        }
 
-              <br>
-              <br>
+        animateParticles();
 
-              <div class="dropdown row ">
-                <span class="menu-title col-lg-10">MORE</span>
-                <button class="btn plus col-lg-2" type="button" data-bs-toggle="collapse" data-bs-target="#dropdown7" aria-expanded="false" aria-controls="dropdown7"><i class="fa-solid fa-plus"></i></button>
-                <div class="collapse" id="dropdown7">
-                  <ul class="list-unstyled">
-                    <li><a class="dropdown-item" href="#"><strong>Lists</strong></a></li>
-                    <li><a class="dropdown-item" href="#"><strong>Interviews</strong></a></li>
-                    <li><a class="dropdown-item" href="#"><strong>Community</strong></a></li>
-                  </ul>
-                </div>
-              </div>
-
-
-              <!--Script-->
-              <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-              <script>
-                // Add event listener to the plus icon button
-                $('.plus').click(function() {
-                // Toggle the rotate-icon class when the button is clicked
-                $(this).find('i').toggleClass('rotate-icon');
-                });
-
-              </script>
-
-              <br>
-              <br>
-
-            
-              <div class="row signin-main">
-                <div class="col-lg-2 signin-icon"><i class="bi bi-person"></i></div>
-                <div class="col-lg-10 signin menu-underline">Sign In</div>
-              </div>
-
-              
-              <div class="social-icons">
-                <a href="#"><i class="fab fa-facebook icon always-show" id="social-icon"></i></a>
-                <a href=""><i class="fab fa-twitter icon always-show"></i></a>
-                <a href=""><i class="fab fa-instagram icon always-show"></i></a>
-                <a href=""><i class="fab fa-linkedin icon always-show"></i></a>
-                <a href=""><i class="fab fa-youtube icon always-show"></i></a>
-                <a href=""><i class="fab fa-pinterest icon"></i></a>
-                <a href=""><i class="fab fa-snapchat icon"></i></a>
-                <a href=""><i class="fab fa-tiktok icon"></i></a>
-                <a href=""><i class="fab fa-reddit icon"></i></a>
-                <i class="fas fa-plus plus-icon" style="color: #C61327; "></i>
-            </div>
-            <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRDf3qw+E4l3jO3FZGz0e6Z5/3QF06Ol2yZV5ro8J" crossorigin="anonymous"></script>
-            <script>
-              $(document).ready(function() {
-              $('.plus-icon').click(function() {
-              $('.social-icons .icon').addClass('show');
-              $(this).hide();
-              });
-              });
-            </script>
-
-            </div>
-        </div>
-
-
-        <div class="col-lg-4"><img src="/img/cbr-logo.svg" class="logo-img"></div>
-        <div class="col-lg-4 signup"><span class="signup"><i class="fa-solid fa-circle-user"></i> Sign in Now</span></div>
-    </div>
-</header>
-<hr>
-
-<div class="trending-bar">
-  <a href="#" class="trending">Trending</a>
-  <a href="#" class=" menu-underline1">Exclusives</a>
-  <span class="separator">•</span>
-  <a href="#" class=" menu-underline1">2024 Movie Releases</a>
-  <span class="separator">•</span>
-  <a href="#" class=" menu-underline1">DCU</a>
-  <span class="separator">•</span>
-  <a href="#" class=" menu-underline1">Dragon Ball</a>
-  <span class="separator">•</span>
-  <a href="#" class=" menu-underline1">Lord of the Rings</a>
-  <span class="separator">•</span>
-  <a href="#" class=" menu-underline1">MCU</a>
-  <span class="separator">•</span>
-  <a href="#" class=" menu-underline1">Star Wars</a>
-</div>
-
-<div class="breadcum">
-  <div class="container-fluid">
-    <h1>MONKEY D. LUFFY <a href=""><i class="fa-solid fa-rss feed"></i></a></h1>
-  </div>
-</div>
-
-<main>
-  <div class="row">
-    <div class="container col-lg-9 main-left">
-      <div>
-        <h2 class="section-title"><span style="text-decoration:underline #C61327; text-underline-offset: 5px; text-decoration-thickness: 5px;">late</span>st</h2>
-        <hr class="hr">
-      </div>
-      <div class="row main-sub">
-        <div class="col-lg-5">
-          <a href="#">
-            <img src="/img/10-biggest-one-piece-manga-cliffhangers-ranked.avif" alt="One Piece" class="article-image">
-          </a>
-        </div>
-        <div class="col-lg-7 main-sub-right">
-          <h5 class="heading-5">Anime</h5>
-          <h2 class="heading">10 Biggest One Piece Manga Cliffhangers, Ranked</h2>
-          <p class="short-discription">Eiichiro Oda always keeps One Piece readers guessing what's going to happen next with every release of every chapter, often with a cliffhanger.</p>
-          <p class="metadata">By <strong>Deni Sahbegovic</strong> &nbsp;&nbsp;&nbsp;&nbsp; May 18, 2024</p>
-        </div>
-      </div>
-      <div class="row main-sub">
-        <div class="col-lg-5">
-          <a href="#">
-            <img src="/img/10-biggest-one-piece-manga-cliffhangers-ranked.avif" alt="One Piece" class="article-image">
-          </a>
-        </div>
-        <div class="col-lg-7 main-sub-right">
-          <h5 class="heading-5">Anime</h5>
-          <h2 class="heading">10 Biggest One Piece Manga Cliffhangers, Ranked</h2>
-          <p class="short-discription">Eiichiro Oda always keeps One Piece readers guessing what's going to happen next with every release of every chapter, often with a cliffhanger.</p>
-          <p class="metadata">By <strong>Deni Sahbegovic</strong> &nbsp;&nbsp;&nbsp;&nbsp; May 18, 2024</p>
-        </div>
-      </div>
-      <div class="row main-sub">
-        <div class="col-lg-5">
-          <a href="#">
-            <img src="/img/10-biggest-one-piece-manga-cliffhangers-ranked.avif" alt="One Piece" class="article-image">
-          </a>
-        </div>
-        <div class="col-lg-7 main-sub-right">
-          <h5 class="heading-5">Anime</h5>
-          <h2 class="heading">10 Biggest One Piece Manga Cliffhangers, Ranked</h2>
-          <p class="short-discription">Eiichiro Oda always keeps One Piece readers guessing what's going to happen next with every release of every chapter, often with a cliffhanger.</p>
-          <p class="metadata">By <strong>Deni Sahbegovic</strong> &nbsp;&nbsp;&nbsp;&nbsp; May 18, 2024</p>
-        </div>
-      </div>
-      <div class="row main-sub">
-        <div class="col-lg-5">
-          <a href="#">
-            <img src="/img/10-biggest-one-piece-manga-cliffhangers-ranked.avif" alt="One Piece" class="article-image">
-          </a>
-        </div>
-        <div class="col-lg-7 main-sub-right">
-          <h5 class="heading-5">Anime</h5>
-          <h2 class="heading">10 Biggest One Piece Manga Cliffhangers, Ranked</h2>
-          <p class="short-discription">Eiichiro Oda always keeps One Piece readers guessing what's going to happen next with every release of every chapter, often with a cliffhanger.</p>
-          <p class="metadata">By <strong>Deni Sahbegovic</strong> &nbsp;&nbsp;&nbsp;&nbsp; May 18, 2024</p>
-        </div>
-      </div>
-      <div class="row main-sub">
-        <div class="col-lg-5">
-          <a href="#">
-            <img src="/img/10-biggest-one-piece-manga-cliffhangers-ranked.avif" alt="One Piece" class="article-image">
-          </a>
-        </div>
-        <div class="col-lg-7 main-sub-right">
-          <h5 class="heading-5">Anime</h5>
-          <h2 class="heading">10 Biggest One Piece Manga Cliffhangers, Ranked</h2>
-          <p class="short-discription">Eiichiro Oda always keeps One Piece readers guessing what's going to happen next with every release of every chapter, often with a cliffhanger.</p>
-          <p class="metadata">By <strong>Deni Sahbegovic</strong> &nbsp;&nbsp;&nbsp;&nbsp; May 18, 2024</p>
-        </div>
-      </div>
-      <div class="row main-sub">
-        <div class="col-lg-5">
-          <a href="#">
-            <img src="/img/10-biggest-one-piece-manga-cliffhangers-ranked.avif" alt="One Piece" class="article-image">
-          </a>
-        </div>
-        <div class="col-lg-7 main-sub-right">
-          <h5 class="heading-5">Anime</h5>
-          <h2 class="heading">10 Biggest One Piece Manga Cliffhangers, Ranked</h2>
-          <p class="short-discription">Eiichiro Oda always keeps One Piece readers guessing what's going to happen next with every release of every chapter, often with a cliffhanger.</p>
-          <p class="metadata">By <strong>Deni Sahbegovic</strong> &nbsp;&nbsp;&nbsp;&nbsp; May 18, 2024</p>
-        </div>
-      </div>
-      <div class="row main-sub">
-        <div class="col-lg-5">
-          <a href="#">
-            <img src="/img/10-biggest-one-piece-manga-cliffhangers-ranked.avif" alt="One Piece" class="article-image">
-          </a>
-        </div>
-        <div class="col-lg-7 main-sub-right">
-          <h5 class="heading-5">Anime</h5>
-          <h2 class="heading">10 Biggest One Piece Manga Cliffhangers, Ranked</h2>
-          <p class="short-discription">Eiichiro Oda always keeps One Piece readers guessing what's going to happen next with every release of every chapter, often with a cliffhanger.</p>
-          <p class="metadata">By <strong>Deni Sahbegovic</strong> &nbsp;&nbsp;&nbsp;&nbsp; May 18, 2024</p>
-        </div>
-      </div>
-      <div class="row main-sub">
-        <div class="col-lg-5">
-          <a href="#">
-            <img src="/img/10-biggest-one-piece-manga-cliffhangers-ranked.avif" alt="One Piece" class="article-image">
-          </a>
-        </div>
-        <div class="col-lg-7 main-sub-right">
-          <h5 class="heading-5">Anime</h5>
-          <h2 class="heading">10 Biggest One Piece Manga Cliffhangers, Ranked</h2>
-          <p class="short-discription">Eiichiro Oda always keeps One Piece readers guessing what's going to happen next with every release of every chapter, often with a cliffhanger.</p>
-          <p class="metadata">By <strong>Deni Sahbegovic</strong> &nbsp;&nbsp;&nbsp;&nbsp; May 18, 2024</p>
-        </div>
-      </div>
-      <div class="row main-sub">
-        <div class="col-lg-5">
-          <a href="#">
-            <img src="/img/10-biggest-one-piece-manga-cliffhangers-ranked.avif" alt="One Piece" class="article-image">
-          </a>
-        </div>
-        <div class="col-lg-7 main-sub-right">
-          <h5 class="heading-5">Anime</h5>
-          <h2 class="heading">10 Biggest One Piece Manga Cliffhangers, Ranked</h2>
-          <p class="short-discription">Eiichiro Oda always keeps One Piece readers guessing what's going to happen next with every release of every chapter, often with a cliffhanger.</p>
-          <p class="metadata">By <strong>Deni Sahbegovic</strong> &nbsp;&nbsp;&nbsp;&nbsp; May 18, 2024</p>
-        </div>
-      </div>
-      <div class="row main-sub">
-        <div class="col-lg-5">
-          <a href="#">
-            <img src="/img/10-biggest-one-piece-manga-cliffhangers-ranked.avif" alt="One Piece" class="article-image">
-          </a>
-        </div>
-        <div class="col-lg-7 main-sub-right">
-          <h5 class="heading-5">Anime</h5>
-          <h2 class="heading">10 Biggest One Piece Manga Cliffhangers, Ranked</h2>
-          <p class="short-discription">Eiichiro Oda always keeps One Piece readers guessing what's going to happen next with every release of every chapter, often with a cliffhanger.</p>
-          <p class="metadata">By <strong>Deni Sahbegovic</strong> &nbsp;&nbsp;&nbsp;&nbsp; May 18, 2024</p>
-        </div>
-      </div>
-      <div class="row main-sub">
-        <div class="col-lg-5">
-          <a href="#">
-            <img src="/img/10-biggest-one-piece-manga-cliffhangers-ranked.avif" alt="One Piece" class="article-image">
-          </a>
-        </div>
-        <div class="col-lg-7 main-sub-right">
-          <h5 class="heading-5">Anime</h5>
-          <h2 class="heading">10 Biggest One Piece Manga Cliffhangers, Ranked</h2>
-          <p class="short-discription">Eiichiro Oda always keeps One Piece readers guessing what's going to happen next with every release of every chapter, often with a cliffhanger.</p>
-          <p class="metadata">By <strong>Deni Sahbegovic</strong> &nbsp;&nbsp;&nbsp;&nbsp; May 18, 2024</p>
-        </div>
-      </div>
-      <div class="row main-sub">
-        <div class="col-lg-5">
-          <a href="#">
-            <img src="/img/10-biggest-one-piece-manga-cliffhangers-ranked.avif" alt="One Piece" class="article-image">
-          </a>
-        </div>
-        <div class="col-lg-7 main-sub-right">
-          <h5 class="heading-5">Anime</h5>
-          <h2 class="heading">10 Biggest One Piece Manga Cliffhangers, Ranked</h2>
-          <p class="short-discription">Eiichiro Oda always keeps One Piece readers guessing what's going to happen next with every release of every chapter, often with a cliffhanger.</p>
-          <p class="metadata">By <strong>Deni Sahbegovic</strong> &nbsp;&nbsp;&nbsp;&nbsp; May 18, 2024</p>
-        </div>
-      </div>
-      <div class="row main-sub">
-        <div class="col-lg-5">
-          <a href="#">
-            <img src="/img/10-biggest-one-piece-manga-cliffhangers-ranked.avif" alt="One Piece" class="article-image">
-          </a>
-        </div>
-        <div class="col-lg-7 main-sub-right">
-          <h5 class="heading-5">Anime</h5>
-          <h2 class="heading">10 Biggest One Piece Manga Cliffhangers, Ranked</h2>
-          <p class="short-discription">Eiichiro Oda always keeps One Piece readers guessing what's going to happen next with every release of every chapter, often with a cliffhanger.</p>
-          <p class="metadata">By <strong>Deni Sahbegovic</strong> &nbsp;&nbsp;&nbsp;&nbsp; May 18, 2024</p>
-        </div>
-      </div>
-      <div class="row main-sub">
-        <div class="col-lg-5">
-          <a href="#">
-            <img src="/img/10-biggest-one-piece-manga-cliffhangers-ranked.avif" alt="One Piece" class="article-image">
-          </a>
-        </div>
-        <div class="col-lg-7 main-sub-right">
-          <h5 class="heading-5">Anime</h5>
-          <h2 class="heading">10 Biggest One Piece Manga Cliffhangers, Ranked</h2>
-          <p class="short-discription">Eiichiro Oda always keeps One Piece readers guessing what's going to happen next with every release of every chapter, often with a cliffhanger.</p>
-          <p class="metadata">By <strong>Deni Sahbegovic</strong> &nbsp;&nbsp;&nbsp;&nbsp; May 18, 2024</p>
-        </div>
-      </div>
-      <div class="row main-sub">
-        <div class="col-lg-5">
-          <a href="#">
-            <img src="/img/10-biggest-one-piece-manga-cliffhangers-ranked.avif" alt="One Piece" class="article-image">
-          </a>
-        </div>
-        <div class="col-lg-7 main-sub-right">
-          <h5 class="heading-5">Anime</h5>
-          <h2 class="heading">10 Biggest One Piece Manga Cliffhangers, Ranked</h2>
-          <p class="short-discription">Eiichiro Oda always keeps One Piece readers guessing what's going to happen next with every release of every chapter, often with a cliffhanger.</p>
-          <p class="metadata">By <strong>Deni Sahbegovic</strong> &nbsp;&nbsp;&nbsp;&nbsp; May 18, 2024</p>
-        </div>
-      </div>
-      <div class="row main-sub">
-        <div class="col-lg-5">
-          <a href="#">
-            <img src="/img/10-biggest-one-piece-manga-cliffhangers-ranked.avif" alt="One Piece" class="article-image">
-          </a>
-        </div>
-        <div class="col-lg-7 main-sub-right">
-          <h5 class="heading-5">Anime</h5>
-          <h2 class="heading">10 Biggest One Piece Manga Cliffhangers, Ranked</h2>
-          <p class="short-discription">Eiichiro Oda always keeps One Piece readers guessing what's going to happen next with every release of every chapter, often with a cliffhanger.</p>
-          <p class="metadata">By <strong>Deni Sahbegovic</strong> &nbsp;&nbsp;&nbsp;&nbsp; May 18, 2024</p>
-        </div>
-      </div>
-      <div class="row main-sub">
-        <div class="col-lg-5">
-          <a href="#">
-            <img src="/img/10-biggest-one-piece-manga-cliffhangers-ranked.avif" alt="One Piece" class="article-image">
-          </a>
-        </div>
-        <div class="col-lg-7 main-sub-right">
-          <h5 class="heading-5">Anime</h5>
-          <h2 class="heading">10 Biggest One Piece Manga Cliffhangers, Ranked</h2>
-          <p class="short-discription">Eiichiro Oda always keeps One Piece readers guessing what's going to happen next with every release of every chapter, often with a cliffhanger.</p>
-          <p class="metadata">By <strong>Deni Sahbegovic</strong> &nbsp;&nbsp;&nbsp;&nbsp; May 18, 2024</p>
-        </div>
-      </div>
-      <div class="row main-sub">
-        <div class="col-lg-5">
-          <a href="#">
-            <img src="/img/10-biggest-one-piece-manga-cliffhangers-ranked.avif" alt="One Piece" class="article-image">
-          </a>
-        </div>
-        <div class="col-lg-7 main-sub-right">
-          <h5 class="heading-5">Anime</h5>
-          <h2 class="heading">10 Biggest One Piece Manga Cliffhangers, Ranked</h2>
-          <p class="short-discription">Eiichiro Oda always keeps One Piece readers guessing what's going to happen next with every release of every chapter, often with a cliffhanger.</p>
-          <p class="metadata">By <strong>Deni Sahbegovic</strong> &nbsp;&nbsp;&nbsp;&nbsp; May 18, 2024</p>
-        </div>
-      </div>
-      <div class="row main-sub">
-        <div class="col-lg-5">
-          <a href="#">
-            <img src="/img/10-biggest-one-piece-manga-cliffhangers-ranked.avif" alt="One Piece" class="article-image">
-          </a>
-        </div>
-        <div class="col-lg-7 main-sub-right">
-          <h5 class="heading-5">Anime</h5>
-          <h2 class="heading">10 Biggest One Piece Manga Cliffhangers, Ranked</h2>
-          <p class="short-discription">Eiichiro Oda always keeps One Piece readers guessing what's going to happen next with every release of every chapter, often with a cliffhanger.</p>
-          <p class="metadata">By <strong>Deni Sahbegovic</strong> &nbsp;&nbsp;&nbsp;&nbsp; May 18, 2024</p>
-        </div>
-      </div>
-      <div class="row main-sub">
-        <div class="col-lg-5">
-          <a href="#">
-            <img src="/img/10-biggest-one-piece-manga-cliffhangers-ranked.avif" alt="One Piece" class="article-image">
-          </a>
-        </div>
-        <div class="col-lg-7 main-sub-right">
-          <h5 class="heading-5">Anime</h5>
-          <h2 class="heading">10 Biggest One Piece Manga Cliffhangers, Ranked</h2>
-          <p class="short-discription">Eiichiro Oda always keeps One Piece readers guessing what's going to happen next with every release of every chapter, often with a cliffhanger.</p>
-          <p class="metadata">By <strong>Deni Sahbegovic</strong> &nbsp;&nbsp;&nbsp;&nbsp; May 18, 2024</p>
-        </div>
-      </div>
-    </div>
-
-    <div class="container col-lg-3">
-      Lorem ipsum dolor sit amet consectetur adipisicing elit. Cum corporis quisquam veniam esse tenetur ipsa placeat delectus, iste dolore? Esse ipsam at dolor, sapiente maxime eos in praesentium impedit quae.
-    </div>
-  </div>
-</main>
-
-  </body>
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+    </script>
+</body>
 </html>
