@@ -93,7 +93,7 @@
                     fadeOutParticle(particle, index);
                 } else {
                     ctx.globalAlpha = particle.opacity;
-                    ctx.font = ${particle.size}px Arial; // Set font size based on particle size
+                    ctx.font = `${particle.size}px Arial`; // Set font size based on particle size
                     ctx.fillStyle = particle.color;
                     ctx.fillText(particle.emoji, particle.x, particle.y); // Draw heart emoji with selected color
                 }
